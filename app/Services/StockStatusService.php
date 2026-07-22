@@ -43,15 +43,20 @@ class StockStatusService
     /**
      * Ambil riwayat TIME_STEP hari untuk satu bahan baku.
      *
-     * Sumber data:
+     * Sumber data (prioritas):
      *   1. Tabel `transaction_details JOIN recipes` → data pemakaian
      *      yang dihitung langsung dari transaksi POS.
      *   2. Tabel `stock_usage_history` → data historis lama (sebelum
      *      fitur perhitungan otomatis diaktifkan).
+     *   3. Tabel `sales_history_import JOIN recipes` → data penjualan
+     *      historis dari Kasir Pintar yang sudah diimpor. Dihitung:
+     *      qty_terjual × usage_amount per resep.
      *
      * Untuk menghindari penghitungan ganda (double-counting), kita
-     * PRIORITASKAN data transaksi. `stock_usage_history` hanya dipakai
-     * sebagai fallback untuk tanggal yang TIDAK memiliki data transaksi.
+     * PRIORITASKAN data transaksi POS. `stock_usage_history` hanya
+     * dipakai sebagai fallback, dan `sales_history_import` sebagai
+     * fallback terakhir untuk tanggal yang TIDAK memiliki data dari
+     * kedua sumber sebelumnya.
      */
     public function ambilRiwayat(int $ingredientId): array
     {
@@ -59,7 +64,7 @@ class StockStatusService
         $tanggalMulai = Carbon::now()->subDays($step - 1)->startOfDay();
         $tanggalAkhir = Carbon::now()->endOfDay();
 
-        // Sumber utama: hitung langsung dari transaksi
+        // Sumber utama: hitung langsung dari transaksi POS
         $dariTransaksi = DB::table('transaction_details')
             ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
             ->join('recipes', 'transaction_details.product_id', '=', 'recipes.product_id')
@@ -69,13 +74,24 @@ class StockStatusService
             ->groupBy('tanggal')
             ->pluck('total', 'tanggal');
 
-        // Sumber fallback: data historis lama
+        // Sumber fallback 1: data historis lama
         $dariHistori = DB::table('stock_usage_history')
             ->where('ingredient_id', $ingredientId)
             ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
             ->pluck('jumlah_terpakai', 'tanggal');
 
-        // Gabungkan: prioritaskan data transaksi, fallback ke histori
+        // Sumber fallback 2: data penjualan dari Kasir Pintar (sales_history_import)
+        // Konversi: qty_terjual (menu) × usage_amount (resep) = pemakaian bahan baku
+        $dariImport = DB::table('sales_history_import')
+            ->join('recipes', 'sales_history_import.product_id', '=', 'recipes.product_id')
+            ->where('recipes.ingredient_id', $ingredientId)
+            ->where('sales_history_import.matched_status', 'matched')
+            ->whereBetween('sales_history_import.tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
+            ->selectRaw('sales_history_import.tanggal, SUM(sales_history_import.qty_terjual * recipes.usage_amount) as total')
+            ->groupBy('sales_history_import.tanggal')
+            ->pluck('total', 'tanggal');
+
+        // Gabungkan: POS → stock_usage_history → sales_history_import
         $gabungan = [];
         for ($i = $step - 1; $i >= 0; $i--) {
             $tanggal = Carbon::now()->subDays($i)->format('Y-m-d');
@@ -83,6 +99,8 @@ class StockStatusService
                 $gabungan[$tanggal] = (float) $dariTransaksi[$tanggal];
             } elseif (isset($dariHistori[$tanggal])) {
                 $gabungan[$tanggal] = (float) $dariHistori[$tanggal];
+            } elseif (isset($dariImport[$tanggal])) {
+                $gabungan[$tanggal] = (float) $dariImport[$tanggal];
             } else {
                 $gabungan[$tanggal] = 0;
             }

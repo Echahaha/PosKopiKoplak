@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\StockOpnameController;
+use App\Http\Controllers\SalesHistoryController;
 
 
 // ==========================================
@@ -99,6 +100,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stok-opname/{id}', [StockOpnameController::class, 'show'])->name('stock-opname.show');
         Route::put('/stok-opname/{id}/details', [StockOpnameController::class, 'updateDetails'])->name('stock-opname.updateDetails');
         Route::post('/stok-opname/{id}/finish', [StockOpnameController::class, 'finish'])->name('stock-opname.finish');
+
+        // ── Import Data Kasir Pintar ──
+        Route::get('/sales-history', [SalesHistoryController::class, 'index'])->name('sales-history.index');
+        Route::post('/sales-history/upload', [SalesHistoryController::class, 'upload'])->name('sales-history.upload');
+        Route::delete('/sales-history', [SalesHistoryController::class, 'destroy'])->name('sales-history.destroy');
         Route::delete('/stok-opname/{id}', [StockOpnameController::class, 'destroy'])->name('stock-opname.destroy');
     });
 });
