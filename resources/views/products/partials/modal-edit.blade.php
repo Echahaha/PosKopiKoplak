@@ -33,8 +33,27 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label-kk">Foto Menu (opsional)</label>
-                        <input type="file" name="image" class="form-control form-control-kk"
-                            accept="image/*">
+                        <div id="foto-wrapper-{{ $product->id }}">
+                            @if($product->image)
+                                <div class="d-flex align-items-center gap-3 p-2" style="background:#f8f9fa;border-radius:10px;border:1px solid #e9ecef;">
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="Foto {{ $product->name }}"
+                                        style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:2px solid #dee2e6;">
+                                    <div class="flex-grow-1">
+                                        <small class="d-block text-muted" style="font-size:11px;">Foto saat ini</small>
+                                        <small class="text-truncate d-block" style="max-width:160px;font-size:11px;color:#6c757d;">{{ basename($product->image) }}</small>
+                                    </div>
+                                    <button type="button" class="btn-aksi btn-aksi-hapus btn-hapus-foto"
+                                        data-product-id="{{ $product->id }}"
+                                        title="Hapus Foto"
+                                        style="border-radius:8px;padding:6px 10px;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            @else
+                                <input type="file" name="image" class="form-control form-control-kk"
+                                    accept="image/*">
+                            @endif
+                        </div>
                     </div>
 
                     <div class="row g-3 mb-3">

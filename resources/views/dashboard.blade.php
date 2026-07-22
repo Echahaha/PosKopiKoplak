@@ -916,9 +916,6 @@
                 <a class="nav-item {{ request()->routeIs('masterdata.*') ? 'active' : '' }}" href="{{ route('masterdata.index') }}">
                     <i class="ti ti-database" aria-hidden="true"></i> Master Data
                 </a>
-                <a class="nav-item {{ request()->routeIs('sales-history.*') ? 'active' : '' }}" href="{{ route('sales-history.index') }}">
-                    <i class="ti ti-file-import" aria-hidden="true"></i> Import Kasir Pintar
-                </a>
                 @endif
 
                 <div class="nav-divider"></div>

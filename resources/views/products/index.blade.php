@@ -967,6 +967,41 @@
                 alert('Minimal harus ada satu bahan baku!');
             }
         }
+
+        // Hapus foto menu
+        if (e.target.closest('.btn-hapus-foto')) {
+            const btn = e.target.closest('.btn-hapus-foto');
+            const productId = btn.getAttribute('data-product-id');
+
+            if (!confirm('Yakin ingin menghapus foto menu ini?')) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+            fetch(`/products/${productId}/delete-image`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const wrapper = document.getElementById('foto-wrapper-' + productId);
+                    wrapper.innerHTML = '<input type="file" name="image" class="form-control form-control-kk" accept="image/*">';
+                } else {
+                    alert(data.message || 'Gagal menghapus foto');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-trash"></i>';
+                }
+            })
+            .catch(() => {
+                alert('Terjadi kesalahan saat menghapus foto');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-trash"></i>';
+            });
+        }
     });
     // ── RESTOCK: auto isi satuan saat pilih bahan ──
     document.getElementById('restock-product-select').addEventListener('change', function() {

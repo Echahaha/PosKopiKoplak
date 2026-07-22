@@ -576,14 +576,24 @@
             <a href="{{ route('reports.index', ['filter' => 'yearly']) }}" class="rpt-tab {{ $activeFilter == 'yearly'    ? 'active' : '' }}">Tahunan</a>
         </div>
 
-        <a href="{{ route('reports.export', request()->query()) }}" class="rpt-export">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Export CSV
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('sales-history.index') }}" class="rpt-export">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                Import Kasir Pintar
+            </a>
+            <a href="{{ route('reports.export', request()->query()) }}" class="rpt-export">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Export CSV
+            </a>
+        </div>
     </div>
 
     {{-- ─────────────────────────────────────────────── --}}

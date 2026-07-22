@@ -233,4 +233,20 @@ class ProductController extends Controller
 
         return view('products.logs', compact('logs'));
     }
+
+    public function deleteImage($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+                $product->update(['image' => null]);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Foto berhasil dihapus!']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus foto: ' . $e->getMessage()], 500);
+        }
+    }
 }
