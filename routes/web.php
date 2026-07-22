@@ -48,8 +48,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Manajemen Produk & Logs
     Route::get('/products/logs', [ProductController::class, 'stockLogs'])->name('products.logs');
-    Route::resource('products', ProductController::class);
     Route::delete('/products/{product}/delete-image', [ProductController::class, 'deleteImage'])->name('products.deleteImage');
+    Route::resource('products', ProductController::class);
 
     // Manajemen Pengeluaran (DIPINDAH KE SINI: Barista & Owner bisa akses)
     Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'destroy']);
